@@ -68,5 +68,69 @@ frequency-changes
 
 (apply + frequency-changes)
 
-;; Does it matter which we use?
-;; Lets time them and see
+;; Supplied answer
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(reduce + frequency-changes)
+;; => 400
+
+
+;; Apply or Reduce - performance testing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Does it matter if we use apply or reduce?
+;; Let's measure their execution time and see
+;; if there is a performance difference.
+
+;; clojure.core/time is a macro that will evaluate an expression,
+;; return the result of the expression,
+;; and also return the time to execute the expression (show in standard out)
+
+(time
+ (reduce + frequency-changes))
+;; => 400
+;; => "Elapsed time: 0.217616 msecs"
+
+(time
+ (apply + frequency-changes))
+;; => 400
+;; => "Elapsed time: 0.165076 msecs"
+
+
+;; Criterium is a library that generates more accurate performance measurements
+;; - the Java Virtual Machine is warmed up before executing, giving consistent results
+;; - an expression is executed thousands of times and average times are returned.
+
+;; Criterium has been added as a dependency to the project.clj configuration
+;; Require criterium directly into the namespace so functions can be used by name
+(require '[criterium.core :refer :all ])
+
+;; bench is a criterium function that runs a benchmark for the given expression
+
+(bench
+ (reduce + frequency-changes))
+
+;; Evaluation count : 2111100 in 60 samples of 35185 calls.
+;; Execution time mean : 27.838289 µs
+;; Execution time std-deviation : 1.079367 µs
+;; Execution time lower quantile : 26.730229 µs ( 2.5%)
+;; Execution time upper quantile : 30.460933 µs (97.5%)
+;; Overhead used : 9.182936 ns
+
+;; Found 2 outliers in 60 samples (3.3333 %)
+;; low-severe  2 (3.3333 %)
+;; Variance from outliers : 25.4348 % Variance is moderately inflated by outliers
+
+(bench
+ (apply + frequency-changes))
+;; Evaluation count : 1870200 in 60 samples of 31170 calls.
+;; Execution time mean : 32.650124 µs
+;; Execution time std-deviation : 607.046803 ns
+;; Execution time lower quantile : 31.962078 µs ( 2.5%)
+;; Execution time upper quantile : 33.946503 µs (97.5%)
+;; Overhead used : 9.182936 ns
+
+;; Found 2 outliers in 60 samples (3.3333 %)
+;; low-severe  1 (1.6667 %)
+;; low-mild  1 (1.6667 %)
+;; Variance from outliers : 7.8102 % Variance is slightly inflated by outliers
+
+
