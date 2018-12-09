@@ -250,3 +250,101 @@ frequency-changes
 #_(contains? [1 2] 1)
 
 
+
+
+;; Reduce approach
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; We may have to go through the frequency changes data set
+;; more than once.  We could iterate over the collection like before
+;; However, there is a really nice function called cycle
+;; cycle will create an infinte (lazy) sequence from the frequency-changes
+;; data set and therefore keep looping until no more values are needed.
+
+;; (cycle frequency-changes)  ;; creates an infinite sequence so be careful using without a constraint
+
+;; reduce calls the function with the argument as a value and first item in the collection,
+;; and is called with each element of the collection until it reaches the end of the collection.
+;; Because of cycle, the collection will not be empty. If it were then the value would be returned without calling the function.
+
+;; Designing the anonymous function signature
+
+#_(reduce + frequency-changes)
+
+#_(take 10
+      (cycle frequency-changes))
+
+
+(reduce (fn [frequency-updates
+             remaining-frequencies])
+        [#{0} 0] (cycle frequency-changes))
+
+;; a vector is a little opaque for a value, a map should be clearer
+
+(def frequency-state
+  {:seen-frequencies   #{0}
+   :adjusted-frequency 0})
+
+;; If we are going to pass a map to a function as an argument,
+;; we can use the keys function to create local names for the values in the map
+
+((fn [{seen-frequencies     :seen-frequencies
+       adjusted-frequencies :adjusted-frequency}]
+   [seen-frequencies adjusted-frequencies])
+ frequency-state)
+
+;; This is quite verbose and required unnecessary typing
+;; The :keys keyword can be used to make this cleaner
+;; by just specifying the local names,
+;; :keys will extract from the map with matching keywords
+
+
+((fn [{:keys [seen-frequencies
+              adjusted-frequency]}]
+   [seen-frequencies adjusted-frequency])
+ frequency-state)
+
+;; Associative Destructuring with maps
+;; https://clojure.org/guides/destructuring#_associative_destructuring
+
+
+
+;; pass the map (value) and the cycled frequencies (collection) to the function as we reduce until we get the answer
+
+
+;; There is a bug here, so show off the debugger...
+(reduce (fn [{:keys [seen-frequencies
+                     adjusted-frequency]}
+             remaining-frequencies]
+          (if (contains? seen-frequencies adjusted-frequency)
+            ;;true - break out
+            (reduced adjusted-frequency)
+            ;;false - return a new map as a value for reduce
+            {:seen-frequencies (conj seen-frequencies adjusted-frequency)
+             :adjusted-frequency (+ adjusted-frequency (first remaining-frequencies))}))
+
+        {:seen-frequencies   #{0}
+         :adjusted-frequency 0}
+        (cycle frequency-changes))
+
+
+
+;; The fixed version
+
+(reduce (fn [{:keys [seen-frequencies
+                     adjusted-frequency]}
+             frequency-change]
+          (let [current-frequency (+ adjusted-frequency frequency-change)]
+            (if (contains? seen-frequencies current-frequency)
+              ;;true - break out
+              (reduced current-frequency)
+              ;;false - return a new map as a value for reduce
+              {:seen-frequencies (conj seen-frequencies current-frequency)
+               :adjusted-frequency current-frequency})))
+
+        ;; value and collection to reduce over
+        {:seen-frequencies   #{0}
+         :adjusted-frequency 0}
+        (cycle frequency-changes))
+
