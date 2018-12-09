@@ -160,3 +160,37 @@ frequency-changes
 ;; -6, +3, +8, +5, -6 first reaches 5 twice.
 ;; +7, +7, -2, -7, -4 first reaches 14 twice.
 
+
+;; Analysing the problem
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Part two is tricky as we need to manage state while we process the frequency-changes
+;; We need to keep track of the frequencies that we adjust the device to each time.
+
+
+;; imperative and mutable solution (DONT DO THIS AT HOME!)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; this is an approach that may be taken by someone coming
+;; from an imperative language background (eg. C, Java).
+;; The solution works, but its not a good use of Clojure.
+
+;; using a mutable collection
+(import '(java.util HashSet))
+;; => java.util.HashSet
+
+(let [result                (atom nil)
+      seen-frequencies      (HashSet.)
+      adjusted-frequency    (atom 0)]
+  (while (nil? @result)
+    (doseq [frequency frequency-changes]
+      (when (and (.contains seen-frequencies @adjusted-frequency)
+                 (nil? @result))
+        (reset! result @adjusted-frequency)) ; break
+
+      ; else
+      (.add seen-frequencies @adjusted-frequency)
+      (swap! adjusted-frequency + frequency)))
+  @result)
+
+
