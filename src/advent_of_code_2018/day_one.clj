@@ -194,3 +194,59 @@ frequency-changes
   @result)
 
 
+
+
+;; Hierarchy in Clojure abstraction / thinking
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; recursion < reduction < sequence operations (map filter)
+
+;; recursion
+;; - low level, you can do everything, but have to do everything
+;; loop recur
+;; functions that call themselves
+
+;; reduction
+;; reduce
+
+;; sequence operators
+;; map filter
+
+;; transducers
+;; transduce
+
+
+
+
+
+
+;; a functional approach using recur
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; loop sets initial values for local names
+;; each recur call resets those values (like calling a function with arguments)
+
+
+(loop [remaining-frequencies frequency-changes
+       seen-frequencies #{}                     ; an empty set
+       adjusted-frequency 0]
+  (if (empty? remaining-frequencies)
+    ;; true - then start processing the frequencies over again
+    (recur frequency-changes
+           seen-frequencies
+           adjusted-frequency)
+    ;; false - keep processing the frequency changes
+    (if (contains? seen-frequencies adjusted-frequency)
+      adjusted-frequency
+      (recur (rest remaining-frequencies)
+             (conj seen-frequencies adjusted-frequency)
+             (+ adjusted-frequency (first remaining-frequencies))))))
+
+;; Notes
+;; A set is used so the contains? function uses values
+;; contains? with vectors is based on index position, not values
+
+;; This approach is quite a low level of abstraction though.
+
+#_(contains? [1 2] 1)
+
+
