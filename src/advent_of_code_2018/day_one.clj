@@ -348,3 +348,122 @@ frequency-changes
          :adjusted-frequency 0}
         (cycle frequency-changes))
 
+
+
+
+
+
+;; reduce and sequence operation approach
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; gives every intermediate result of a reduce
+;; so we can see a running total as our frequencies are added up
+(reductions + frequency-changes)
+
+
+(reduce (fn [seen-frequencies
+             frequency]
+          (if (contains? seen-frequencies frequency)
+            (reduced frequency)
+            (conj seen-frequencies frequency)))
+
+        ;; value and collection to reduce over
+        #{}
+        (reductions + (cycle frequency-changes)))
+
+
+;; but we could abstract further
+;; what if we had a duplicates function, that only returned duplicates
+
+(reductions + (cycle frequency-changes))
+
+(_duplicates_ (reductions + (cycle frequency-changes)))
+
+;; there is not duplicates function in Clojure, but we could make one.
+;; distinct is very close
+
+(first (complement distinct (reductions + cycle frequency-changes)))
+;; wrong args
+
+(first (set (reductions + frequency-changes)))
+
+(distinct
+ (reductions + frequency-changes))
+
+(reductions + cycle frequency-changes)
+
+;; so filter by frequencies greater than 1
+
+(frequencies
+ (reductions + frequency-changes))
+
+(filter frequencies (reductions + frequency-changes))
+
+
+;; writing a simple helper function based on distinct, but only keeping duplicates
+
+(defn duplicates [values]
+  (loop [-values values
+         seen #{}]
+    (let [-number (first -values)]
+      (if (contains? seen -number)
+        -number
+        (recur
+         (rest -values)
+         (conj seen -number))))))
+
+;; simple set comparison
+(#{0 1 2 3 4 5} 4)
+;; => 4
+(#{0 1 2 3 4 5} 9)
+;; => nil
+
+
+;; now we are really simple
+(duplicates (reductions + (cycle frequency-changes)))
+
+(take 10
+      (range))
+
+;; or using the threading macro
+(->> frequency-changes
+     cycle
+     (reductions +)
+     duplicates)
+
+
+
+
+
+;; failed experiments
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; simplest possible
+;; add the frequencies one by one, keeping a record of each result
+
+;; massively redundant and imperative approach
+
+#_(loop [current-frequency (first frequency-changes)
+       remaining-frequencies (rest frequency-changes)
+       adjusted-frequencies []]
+  (if (some #(= (last adjusted-frequencies) %) (rest (reverse adjusted-frequencies)))
+    (last adjusted-frequencies)
+    (recur (first remaining-frequencies)
+           (rest remaining-frequencies)
+           (conj adjusted-frequencies
+                 (if (empty? adjusted-frequencies)
+                   current-frequency
+                   (+ (last adjusted-frequencies) current-frequency)) ))))
+;; => 36
+;; fail
+
+(last [])
+;; => nil
+
+(+ nil 4)
+;; null pointer exception
+
+(+ 4 nil)
+;; null pointer exception
+
