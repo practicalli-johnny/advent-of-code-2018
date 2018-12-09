@@ -467,3 +467,22 @@ frequency-changes
 (+ 4 nil)
 ;; null pointer exception
 
+
+;; using a set
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; if the adjusted frequency is used as an argument to the set,
+;; then the set will return the frequency if its already there
+;; otherwise the set returns nil
+;; so we can then return the adjusted frequency
+;; otherwise we keep going
+
+(clojure.set/intersection #{1 2 3} #{3 4 5})
+
+(clojure.set/difference)
+(clojure.set/intersection)
+
+(def a #{1 2 3})
+(def b #{3 4 5})
+(concat (clojure.set/difference a b) (clojure.set/difference b a))
+
+(concat (clojure.set/difference a b) (clojure.set/difference b a))
