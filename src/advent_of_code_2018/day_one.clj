@@ -1,4 +1,5 @@
-(ns advent-of-code-2018.day-one)
+(ns advent-of-code-2018.day-one
+  (:require [advent-of-code-2018.day-one-data-set :refer :all]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Day 1: Chronal Calibration
@@ -29,3 +30,43 @@
 ;; -1, -2, -3 results in -6
 ;; Starting with a frequency of zero, what is the resulting frequency after all of the changes in frequency have been applied?
 
+
+;; Analyse the problem
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Start with nothing and add together all the numbers that represent frequency changes
+
+;; Example data
+(+ 1 1 1)
+(+ 1 1 -2)
+(+ -1 -2 -3)
+
+;; so we could have all the numbers as arguments
+;; usually we would have a sequence of numbers as a collection, usually a vector
+
+;; NOTE: Added Advent of Code data set in its own namespace, as its about 1000 long
+;; The data set is called frequency-changes
+frequency-changes
+
+;; Can we simply use the + function to add values in the collection?
+
+(+ frequency-changes)
+
+;; No, my linter tells me + can only take numbers as arguments and not a collection.
+;; I get the same error message if I evaluate.
+
+;; I could be sneaky and just paste all the numbers in as arguments to +
+;; or I could use my editor to evaluate frequency-changes and replace the symbol with its value.
+
+
+;; working with collections
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; we have used map function over collections before
+(map + frequency-changes)
+
+;; reduce is more applicable, so is apply
+(reduce + frequency-changes)
+
+(apply + frequency-changes)
+
+;; Does it matter which we use?
+;; Lets time them and see
